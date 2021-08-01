@@ -1,5 +1,6 @@
 import React, {Component} from "react";
 import {render} from "react-dom";
+import Dashboard from "./Dashboard";
 
 export default class App extends Component{
     constructor(props){
@@ -7,9 +8,9 @@ export default class App extends Component{
     }
 
     render(){
-        return <h1>Wola que pex</h1>;
+        return <Dashboard></Dashboard>;
     }
 }
 
 const appDiv = document.getElementById("app");
-render(<App />, appDiv)
+render(<App name="rex"/>, appDiv)
