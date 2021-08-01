@@ -5,3 +5,6 @@ controller/__pycache__
  
 api/__pycache__
 api/migrations
+
+frontend/migrations
+frontend/node_modules
