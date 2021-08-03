@@ -19,15 +19,20 @@ function getCookie(name) {
 export default class Filter extends Component{
     constructor(props){
         super(props);
+        this._isMounted = false;
         this.state = {
             data:[],
             loaded: false,
             placeholder: "Loading"        };
     }
 
+    componentWillUnmount(){
+        this._isMounted = false
+    }
+
     componentDidMount(){
+        this._isMounted = true
         console.log(this.props)
-        var csrftoken = getCookie('csrftoken');
         fetch("http://localhost:8000/api/filter/",{
             method:'POST',
             headers:{
@@ -47,12 +52,14 @@ export default class Filter extends Component{
             }
             return response.json();
         }).then(data => {
-            this.setState(() => {
-                return {
-                    data,
-                    loaded: true
-                }
-            });
+            if (this._isMounted){
+                this.setState(() => {
+                    return {
+                        data,
+                        loaded: true
+                    }
+                });
+            }
         });
     }
 

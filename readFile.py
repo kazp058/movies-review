@@ -1,5 +1,6 @@
 import re
 import mysql.connector
+from datetime import datetime
 
 config = {
   'host': 'localhost',
@@ -8,6 +9,10 @@ config = {
   'database': 'app',
   'raise_on_warnings': True,
   }
+
+def makedatetime(timestamp):
+    date = datetime.fromtimestamp( int(timestamp))
+    return date.strftime('%Y-%m-%d %H:%M:%S')
 
 def searchRegex(expression, chunk):
     ex = re.compile(expression)
@@ -68,24 +73,24 @@ with open('movies.txt','r', encoding="Latin-1") as f:
             
             check_product = ("SELECT productcol FROM products WHERE productId = %s")
             check_user = ("SELECT userscol FROM users WHERE usersId = %s")
-            #check_text = ("SELECT textid FROM texts WHERE summary = %s AND text = %s")
+            check_text = ("SELECT textid FROM texts WHERE summary = %s AND text = %s")
 
             check_review = ("SELECT reviewId FROM reviews WHERE productcol = %s AND "
                             "usercol = %s AND timestamp = %s")
 
             add_user = ("INSERT INTO users (usersId, profileName) VALUES (%s, %s)")
             add_product = ("INSERT INTO products (productId) VALUES (%s)")
-            #add_text = ("INSERT INTO texts (summary, text) VALUES (%s,%s)")
+            add_text = ("INSERT INTO texts (summary, text) VALUES (%s,%s)")
 
-            add_review = ("INSERT INTO reviews (productcol,usercol,helpfulness,score,timestamp) VALUES (%s,%s,%s,%s,%s)")
+            add_review = ("INSERT INTO reviews (productcol,usercol,helpfulness,score,timestamp, textId) VALUES (%s,%s,%s,%s,%s,%s)")
 
             usercol,newuser = add_uniqueid_element(cnx,add_user,check_user,(values[1],),(values[1], values[2],))
             productcol, newproduct = add_uniqueid_element(cnx,add_product,check_product,(values[0],))
-            #textid, newtext = add_uniqueid_element(cnx,add_text,check_text,(values[6],values[7],))
+            textid, newtext = add_uniqueid_element(cnx,add_text,check_text,(values[6],values[7],))
 
             helpfulness = process_helpfulness(values[3])
 
-            reviewid, newreview = add_uniqueid_element(cnx,add_review,check_review,(str(productcol), str(usercol), values[5]), (str(productcol), str(usercol), str(helpfulness), values[4],values[5]))
+            reviewid, newreview = add_uniqueid_element(cnx,add_review,check_review,(str(productcol), str(usercol), makedatetime(values[5])), (str(productcol), str(usercol), str(helpfulness), values[4], makedatetime(values[5]), str(textid)))
 
             if current_product != values[0]:
                 last_product = current_product
@@ -93,11 +98,10 @@ with open('movies.txt','r', encoding="Latin-1") as f:
 
                 if last_product != "":
                     print("\tNew Reviews:",str(new_entries[2]))
-                    print("\tNew Products:",str(new_entries[1]))
                     print("\tNew Users:",str(new_entries[0]))
                     new_entries = [0,0,0]
 
-                print("\nINSERTING REVIEWS FOR PRODUCT %s\n" %current_product)
+                print("\nINSERTING REVIEWS FOR PRODUCT #%s %s\n" %(productcol, current_product))
                 
             new_entries[0] += newuser 
             new_entries[1] += newproduct 

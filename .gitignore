@@ -1,6 +1,8 @@
 .vscode
 django
 
+movies.txt
+
 controller/__pycache__
  
 api/__pycache__
